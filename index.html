@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clean Water Clicker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --jerry-can-yellow: #FFC907;
+      --deep-blue: #003366;
+      --water-blue: #77A8BB;
+      --cream-white: #FFF7E1;
+      --rich-black: #1A1A1A;
+      --clay-orange: #BF6C46;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    body {
+      background-color: var(--cream-white);
+      color: var(--deep-blue);
+      font-family: 'Quicksand', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .main-layout {
+      display: flex;
+      gap: 32px;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+    }
+    .column {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .column.upgrades {
+      align-items: flex-start;
+    }
+    .column.stats {
+      align-items: flex-end;
+    }
+    h1, h2, .liter-count {
+      font-family: 'Fredoka', sans-serif;
+      color: var(--deep-blue);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5em;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+        .button-primary {
+          background-color: var(--jerry-can-yellow);
+          border: none;
+          border-radius: 50px;
+          padding: 15px 30px;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+        .button-primary:hover {
+          transform: translateY(-3px);
+        }
+    .container-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .container-label {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--deep-blue);
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .container-visual {
+      width: 180px;
+      height: 220px;
+      background: #e0e0e0;
+      border-radius: 24px 24px 32px 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+      transition: border-radius 0.5s, width 0.5s, height 0.5s;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    /* Container shapes for each stage */
+    .stage-cup    { width: 70px;  height: 90px;  border-radius: 18px 18px 24px 24px; }
+    .stage-bucket { width: 90px;  height: 120px; border-radius: 18px 18px 28px 28px; }
+    .stage-bathtub{ width: 160px; height: 80px;  border-radius: 32px 32px 40px 40px; }
+    .stage-pool   { width: 200px; height: 100px; border-radius: 40px 40px 50px 50px; }
+    .stage-waterpark { width: 220px; height: 140px; border-radius: 50px 50px 60px 60px; }
+    .stage-ocean  { width: 260px; height: 180px; border-radius: 60px 60px 80px 80px; }
+    .water-fill {
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 100%;
+      background: linear-gradient(180deg, #b6e3f7 0%, var(--water-blue) 100%);
+      transition: height 0.4s cubic-bezier(0.4,1,0.6,1);
+      z-index: 1;
+      border-radius: inherit;
+      box-shadow: 0 0 16px 0 #77A8BB55 inset;
+    }
+    .clicker-btn {
+      margin-top: 18px;
+      width: 120px;
+      height: 120px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+      font-weight: normal;
+      color: #2E9DF7;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.08s cubic-bezier(0.4,2,0.6,1);
+      position: relative;
+      outline: none;
+      line-height: 1;
+      padding: 0;
+    }
+    .clicker-btn:active {
+      transform: scale(0.93);
+    }
+    .floating-plus {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--jerry-can-yellow);
+      text-shadow: 0 2px 8px #00336688;
+      opacity: 0.95;
+      animation: floatUp 0.8s forwards;
+      z-index: 10;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1);}
+      80% { opacity: 0.7; }
+      100% { opacity: 0; transform: translateY(-40px) scale(1.3);}
+    }
+    .upgrade-section {
+      width: 100%;
+      margin-bottom: 24px;
+    }
+    .upgrade-title {
+      font-size: 1.1rem;
+      color: var(--deep-blue);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .upgrade-btn {
+      background: var(--jerry-can-yellow);
+      color: var(--deep-blue);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 22px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #ffc90733;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .upgrade-btn:disabled {
+      background: #e0e0e0;
+      color: #aaa;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .reset-btn {
+      background: var(--clay-orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      margin-top: 18px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .reset-btn:hover {
+      background: #a14d2e;
+    }
+    .stats-section {
+      width: 100%;
+      background: #f7f7f7;
+      border-radius: 12px;
+      padding: 18px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 6px #00336611;
+    }
+    .stats-section h2 {
+      color: var(--deep-blue);
+      font-size: 1.1rem;
+      margin: 0 0 10px 0;
+      font-weight: bold;
+    }
+    .stats-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 1.05rem;
+    }
+    .stats-list li {
+      margin-bottom: 6px;
+      color: var(--rich-black);
+    }
+    .fact-toast {
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translate(-50%, 20px);
+      background: var(--deep-blue);
+      color: #fff;
+      padding: 28px 48px;
+      border-radius: 32px;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 8px 48px #00336699;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      animation: toastIn 0.5s forwards;
+      text-align: center;
+      max-width: 90vw;
+      word-break: break-word;
+    }
+    @keyframes toastIn {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.9);}
+      100% { opacity: 1; transform: translate(-50%, 20px) scale(1);}
+    }
+    .broken-pipe-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--clay-orange);
+      opacity: 0.85;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.3s;
+      pointer-events: all;
+    }
+    .broken-pipe-msg {
+      color: #fff;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      text-shadow: 0 2px 8px #1a1a1a88;
+    }
+    .fix-btn {
+      background: #fff;
+      color: var(--clay-orange);
+      border: none;
+      border-radius: 8px;
+      padding: 14px 32px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #bf6c4633;
+      transition: background 0.2s;
+    }
+    .fix-btn:active {
+      background: #ffe3d2;
+    }
+    @media (max-width: 768px) {
+      .main-layout {
+        flex-direction: column;
+        gap: 18px;
+        padding: 10px;
+      }
+      .column.upgrades, .column.stats {
+        align-items: center;
+      }
+      .container-visual, .stage-cup, .stage-bucket, .stage-bathtub, .stage-pool, .stage-waterpark, .stage-ocean {
+        width: 90vw !important;
+        max-width: 98vw;
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>💧 Clean Water Clicker</h1>
+  <div class="main-layout">
+    <!-- Upgrades Column -->
+    <div class="column upgrades">
+      <div class="upgrade-section">
+        <div class="upgrade-title">Upgrades</div>
+        <button class="upgrade-btn" id="buy-autoclicker">Buy Solar Pump<br>(100L)</button>
+        <div id="autoclicker-status" style="font-size:0.98rem; color:var(--deep-blue); margin-top:8px; min-height:22px;"></div>
+      </div>
+      <button class="reset-btn" id="reset-btn">Reset Mission</button>
+    </div>
+    <!-- Main Game Column -->
+    <div class="column main">
+      <div class="container-area">
+        <div class="container-label" id="container-label">Cup (Goal: 50L)</div>
+        <div class="container-visual stage-cup" id="container-visual">
+          <div class="water-fill" id="water-fill" style="height:0%"></div>
+        </div>
+        <button class="clicker-btn" id="clicker-btn" title="Collect Water!">💧</button>
+      </div>
+      <div style="text-align:center; color:var(--deep-blue); font-size:1.1rem; margin-top:8px;">
+        Click the droplet to collect water!
+      </div>
+    </div>
+    <!-- Stats & Facts Column -->
+    <div class="column stats">
+      <div class="stats-section">
+        <h2>Stats</h2>
+        <ul class="stats-list">
+          <li>Liters: <span id="liters">0</span> / <span id="goal">50</span></li>
+          <li>Stage: <span id="stage-name">Cup</span></li>
+          <li>Solar Pump: <span id="autoclicker-owned">No</span></li>
+        </ul>
+      </div>
+      <div class="stats-section">
+        <h2>Facts</h2>
+        <div id="fact-box" style="font-size:1rem; color:var(--deep-blue); min-height:40px;">
+          771 million people lack access to clean water.
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Toast for facts -->
+  <div class="fact-toast" id="fact-toast" style="display:none;"></div>
+  <!-- Broken Pipe Overlay -->
+  <div class="broken-pipe-overlay" id="broken-pipe-overlay" style="display:none;">
+    <div class="broken-pipe-msg">🚨 Broken Pipe! Water is leaking!</div>
+    <button class="fix-btn" id="fix-btn">Fix</button>
+  </div>
+  <script>
+    // --- GAME DATA ---
+    const stages = [
+      { name: "Cup",         goal: 50,      class: "stage-cup" },
+      { name: "Bucket",      goal: 250,     class: "stage-bucket" },
+      { name: "Bathtub",     goal: 1000,    class: "stage-bathtub" },
+      { name: "Swimming Pool", goal: 5000,  class: "stage-pool" },
+      { name: "Waterpark",   goal: 20000,   class: "stage-waterpark" },
+      { name: "Ocean",       goal: 100000,  class: "stage-ocean" }
+    ];
+    const facts = [
+      "771 million people lack access to clean water.",
+      "Every 2 minutes, a child dies from a water-related disease.",
+      "Women and girls spend 200 million hours daily collecting water.",
+      "Access to clean water can improve school attendance by 50%.",
+      "1 in 10 people worldwide live without clean water.",
+      "Charity: water has funded 111,000+ water projects in 29 countries.",
+      "Clean water reduces waterborne diseases by up to 80%.",
+      "Every $1 invested in water returns $4 in economic benefits.",
+      "Dirty water kills more people than all forms of violence, including war.",
+      "Safe water access can cut global poverty by a third."
+    ];
+    // --- GAME STATE ---
+    let liters = 0;
+    let stageIdx = 0;
+    let autoClicker = false;
+    let autoClickerInterval = null;
+    let brokenPipeTimeout = null;
+    let brokenPipeActive = false;
+    let brokenPipeTimer = null;
+    let nextBrokenPipe = null;
+    let factIdx = 0;
+    let pointsPerClick = 1;
+    let pointsPerAuto = 5;
+    // Upgrades unlocked at each milestone
+    const milestoneUpgrades = [
+      { name: "Rain Barrel", desc: "+1 per click", cost: 200, bought: false, effect: function() { pointsPerClick += 1; } },
+      { name: "Water Filter", desc: "+10% per click", cost: 800, bought: false, effect: function() { pointsPerClick = Math.ceil(pointsPerClick * 1.1); } },
+      { name: "Village Well", desc: "+10 per auto", cost: 3000, bought: false, effect: function() { pointsPerAuto += 10; } },
+      { name: "Irrigation", desc: "+50% per auto", cost: 12000, bought: false, effect: function() { pointsPerAuto = Math.ceil(pointsPerAuto * 1.5); } },
+      { name: "Water Tower", desc: "Double all points", cost: 50000, bought: false, effect: function() { pointsPerClick *= 2; pointsPerAuto *= 2; } },
+    ];
+    // --- DOM ELEMENTS ---
+    const litersEl = document.getElementById('liters');
+    const goalEl = document.getElementById('goal');
+    const stageNameEl = document.getElementById('stage-name');
+    const containerLabel = document.getElementById('container-label');
+    const containerVisual = document.getElementById('container-visual');
+    const waterFill = document.getElementById('water-fill');
+    const clickerBtn = document.getElementById('clicker-btn');
+    const buyAutoClickerBtn = document.getElementById('buy-autoclicker');
+    const autoClickerStatus = document.getElementById('autoclicker-status');
+    const autoClickerOwned = document.getElementById('autoclicker-owned');
+    const resetBtn = document.getElementById('reset-btn');
+    const factToast = document.getElementById('fact-toast');
+    const factBox = document.getElementById('fact-box');
+    const brokenPipeOverlay = document.getElementById('broken-pipe-overlay');
+    const fixBtn = document.getElementById('fix-btn');
+    // Upgrades UI
+    const upgradesSection = document.querySelector('.upgrade-section');
+    // --- UTILS ---
+    function updateUI() {
+      litersEl.textContent = liters;
+      goalEl.textContent = stages[stageIdx].goal;
+      stageNameEl.textContent = stages[stageIdx].name;
+      containerLabel.textContent = `${stages[stageIdx].name} (Goal: ${stages[stageIdx].goal.toLocaleString()}L)`;
+      // Container shape
+      containerVisual.className = 'container-visual ' + stages[stageIdx].class;
+      // Water fill
+      let percent = Math.min(100, (liters / stages[stageIdx].goal) * 100);
+      waterFill.style.height = percent + "%";
+      // Upgrades
+      autoClickerOwned.textContent = autoClicker ? "Yes" : "No";
+      buyAutoClickerBtn.disabled = autoClicker || liters < 100;
+      autoClickerStatus.textContent = autoClicker ? `Solar Pump is running (+${pointsPerAuto}L/sec)` : "";
+      // Render milestone upgrades
+      renderMilestoneUpgrades();
+    }
+
+    function renderMilestoneUpgrades() {
+      // Remove old milestone upgrade buttons
+      let oldBtns = upgradesSection.querySelectorAll('.milestone-upgrade-btn');
+      oldBtns.forEach(btn => btn.remove());
+      // Show upgrades up to current stage
+      for (let i = 0; i <= stageIdx - 1 && i < milestoneUpgrades.length; i++) {
+        const upg = milestoneUpgrades[i];
+        if (upg.bought) continue;
+        const btn = document.createElement('button');
+        btn.className = 'upgrade-btn milestone-upgrade-btn';
+        btn.textContent = `${upg.name} (${upg.desc})\n(${upg.cost}L)`;
+        btn.disabled = liters < upg.cost;
+        btn.onclick = function() {
+          if (liters >= upg.cost && !upg.bought) {
+            liters -= upg.cost;
+            upg.bought = true;
+            upg.effect();
+            updateUI();
+            showFactToast(`Upgrade: ${upg.name} purchased!`);
+          }
+        };
+        upgradesSection.appendChild(btn);
+      }
+    }
+    function showFactToast(msg) {
+      factToast.textContent = msg;
+      // Attach to main-layout for absolute positioning
+      const mainLayout = document.querySelector('.main-layout');
+      if (factToast.parentElement !== mainLayout) {
+        mainLayout.appendChild(factToast);
+      }
+      factToast.style.display = "block";
+      factToast.style.opacity = "1";
+      setTimeout(() => {
+        factToast.style.opacity = "0";
+        setTimeout(() => { factToast.style.display = "none"; }, 1000);
+      }, 6000);
+    }
+    function showFactBox(msg) {
+      factBox.textContent = msg;
+    }
+    function nextFact() {
+      factIdx = (factIdx + 1) % facts.length;
+      return facts[factIdx];
+    }
+    function triggerConfetti() {
+      confetti({
+        particleCount: 300,
+        spread: 120,
+        origin: { y: 0.7 },
+        colors: ['#FFC907', '#2E9DF7', '#77A8BB'],
+        zIndex: 2000
+      });
+      setTimeout(() => {
+        confetti({
+          particleCount: 200,
+          spread: 90,
+          origin: { y: 0.5 },
+          colors: ['#FFC907', '#2E9DF7'],
+          zIndex: 2000
+        });
+      }, 400);
+    }
+    // --- CLICKER LOGIC ---
+    function addLiters(amount, mouseX, mouseY) {
+      liters += amount;
+      if (liters < 0) liters = 0;
+      updateUI();
+      // Animate water fill
+      waterFill.style.transition = "height 0.4s cubic-bezier(0.4,1,0.6,1)";
+      // Floating +1
+      if (amount > 0 && mouseX !== undefined && mouseY !== undefined) {
+        const plus = document.createElement('div');
+        plus.className = 'floating-plus';
+        plus.textContent = `+${amount}`;
+        document.body.appendChild(plus);
+        // Position at mouse
+        plus.style.left = (mouseX - 10) + "px";
+        plus.style.top = (mouseY - 30) + "px";
+        setTimeout(() => plus.remove(), 800);
+      }
+      // Check for evolution
+      if (liters >= stages[stageIdx].goal) {
+        if (stageIdx < stages.length - 1) {
+          liters = 0;
+          stageIdx++;
+          // Double points per click and auto at each milestone
+          pointsPerClick *= 2;
+          pointsPerAuto *= 2;
+          updateUI();
+          showFactToast(nextFact());
+          showFactBox(facts[factIdx]);
+        } else {
+          // WIN!
+          liters = stages[stageIdx].goal;
+          updateUI();
+          showFactToast("🌊 You filled the Ocean! Clean water for all!");
+          triggerConfetti();
+        }
+      }
+    }
+    clickerBtn.addEventListener('click', e => {
+      // Animate click
+      clickerBtn.style.transform = "scale(0.93)";
+      setTimeout(() => clickerBtn.style.transform = "scale(1)", 90);
+      addLiters(pointsPerClick, e.clientX, e.clientY);
+    });
+    // --- AUTOCLICKER ---
+    buyAutoClickerBtn.addEventListener('click', () => {
+      if (!autoClicker && liters >= 100) {
+        liters -= 100;
+        autoClicker = true;
+        updateUI();
+        autoClickerInterval = setInterval(() => {
+          if (!brokenPipeActive) addLiters(pointsPerAuto);
+        }, 1000);
+      }
+    });
+    // --- BROKEN PIPE EVENT ---
+    function scheduleBrokenPipe() {
+      if (nextBrokenPipe) clearTimeout(nextBrokenPipe);
+      nextBrokenPipe = setTimeout(triggerBrokenPipe, 45000);
+    }
+    function triggerBrokenPipe() {
+      if (brokenPipeActive) return;
+      brokenPipeActive = true;
+      brokenPipeOverlay.style.display = "flex";
+      // Timer to auto-lose liters if not fixed
+      brokenPipeTimer = setTimeout(() => {
+        if (brokenPipeActive) {
+          addLiters(-100);
+          brokenPipeOverlay.style.display = "none";
+          brokenPipeActive = false;
+          scheduleBrokenPipe();
+        }
+      }, 5000);
+    }
+    fixBtn.addEventListener('click', () => {
+      if (brokenPipeActive) {
+        brokenPipeActive = false;
+        brokenPipeOverlay.style.display = "none";
+        if (brokenPipeTimer) clearTimeout(brokenPipeTimer);
+        scheduleBrokenPipe();
+      }
+    });
+    // --- RESET ---
+    resetBtn.addEventListener('click', () => {
+      if (confirm("Are you sure you want to reset your mission? All progress will be lost.")) {
+        liters = 0;
+        stageIdx = 0;
+        autoClicker = false;
+        pointsPerClick = 1;
+        pointsPerAuto = 5;
+        milestoneUpgrades.forEach(u => u.bought = false);
+        if (autoClickerInterval) clearInterval(autoClickerInterval);
+        updateUI();
+        showFactBox(facts[0]);
+        scheduleBrokenPipe();
+      }
+    });
+    // --- INIT ---
+    function init() {
+      updateUI();
+      showFactBox(facts[0]);
+      scheduleBrokenPipe();
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>
