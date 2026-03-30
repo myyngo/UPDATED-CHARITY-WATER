@@ -1,608 +1,1051 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Clean Water Clicker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
-  <!-- Confetti library -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Water Quest — charity: water</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --jerry-can-yellow: #FFC907;
-      --deep-blue: #003366;
-      --water-blue: #77A8BB;
-      --cream-white: #FFF7E1;
-      --rich-black: #1A1A1A;
-      --clay-orange: #BF6C46;
+      --yellow: #FFC907;
+      --yellow-light: #FFE066;
+      --black: #111111;
+      --dark: #1a1a1a;
+      --cell-bg: #2a2a2a;
+      --cell-hover: #333;
+      --white: #ffffff;
+      --green: #27ae60;
+      --red: #e74c3c;
     }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-    }
+
     body {
-      background-color: var(--cream-white);
-      color: var(--deep-blue);
-      font-family: 'Quicksand', sans-serif;
-      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--dark);
+      color: var(--white);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .logo-dot {
+      width: 14px; height: 14px;
+      background: var(--yellow);
+      border-radius: 50%;
+    }
+
+    .brand-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--yellow);
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 900;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    h1 span { color: var(--yellow); }
+
+    .tagline {
+      font-size: 0.95rem;
+      color: #aaa;
+      margin-top: 6px;
+    }
+
+    /* ── DIFFICULTY ── */
+    #difficulty-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    #difficulty-section p {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    <!-- JavaScript moved to script.js -->
+      color: #888;
+    }
+
+    .diff-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       justify-content: center;
     }
-    .main-layout {
+
+    .diff-btn {
+      padding: 10px 24px;
+      border-radius: 50px;
+      border: 2px solid #444;
+      background: transparent;
+      color: #aaa;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .diff-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    .diff-btn.selected {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: var(--black);
+    }
+
+    /* ── STATS BAR ── */
+    #stats-bar {
       display: flex;
-      gap: 32px;
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 24px;
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 14px;
     }
-    .column {
-      flex: 1 1 0;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .column.upgrades {
-      align-items: flex-start;
-    }
-    .column.stats {
-      align-items: flex-end;
-    }
-    h1, h2, .liter-count {
-      font-family: 'Fredoka', sans-serif;
-      color: var(--deep-blue);
-    }
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 0.5em;
-      text-align: center;
-      letter-spacing: 1px;
-    }
-        .button-primary {
-          background-color: var(--jerry-can-yellow);
-          border: none;
-          border-radius: 50px;
-          padding: 15px 30px;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-        }
-        .button-primary:hover {
-          transform: translateY(-3px);
-        }
-    .container-area {
+
+    .stat-box {
+      flex: 1;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin-bottom: 24px;
+      gap: 2px;
     }
-    .container-label {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: var(--deep-blue);
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--yellow);
+      line-height: 1;
+    }
+
+    /* ── PROGRESS BAR ── */
+    #progress-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 14px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .progress-track {
+      background: #222;
+      border-radius: 50px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--yellow);
+      border-radius: 50px;
+      transition: width 0.3s ease;
+    }
+
+    /* ── MILESTONE MESSAGE ── */
+    #milestone-msg {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--yellow);
       margin-bottom: 10px;
-      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.3s;
       text-align: center;
     }
-    .container-visual {
-      width: 180px;
-      height: 220px;
-      background: #e0e0e0;
-      border-radius: 24px 24px 32px 32px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+
+    #milestone-msg.show { opacity: 1; }
+    #milestone-msg.milestone-celebration { color: #FFE066; text-shadow: 0 0 12px rgba(255,201,7,0.5); }
+    #milestone-msg.milestone-warning     { color: #e74c3c; }
+    #milestone-msg.milestone-normal      { color: var(--yellow); }
+
+    /* ── GAME GRID ── */
+    #game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 16px;
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      background: var(--cell-bg);
+      border-radius: 14px;
+      border: 2px solid #2f2f2f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
       overflow: hidden;
-      margin-bottom: 12px;
-      transition: border-radius 0.5s, width 0.5s, height 0.5s;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
+      transition: background 0.2s;
     }
-    /* Container shapes for each stage */
-    .stage-cup    { width: 70px;  height: 90px;  border-radius: 18px 18px 24px 24px; }
-    .stage-bucket { width: 90px;  height: 120px; border-radius: 18px 18px 28px 28px; }
-    .stage-bathtub{ width: 160px; height: 80px;  border-radius: 32px 32px 40px 40px; }
-    .stage-pool   { width: 200px; height: 100px; border-radius: 40px 40px 50px 50px; }
-    .stage-waterpark { width: 220px; height: 140px; border-radius: 50px 50px 60px 60px; }
-    .stage-ocean  { width: 260px; height: 180px; border-radius: 60px 60px 80px 80px; }
-    .water-fill {
-      position: absolute;
-      left: 0; bottom: 0;
+
+    /* ── JERRY CAN ── */
+    .water-can-wrapper {
       width: 100%;
-      background: linear-gradient(180deg, #b6e3f7 0%, var(--water-blue) 100%);
-      transition: height 0.4s cubic-bezier(0.4,1,0.6,1);
-      z-index: 1;
-      border-radius: inherit;
-      box-shadow: 0 0 16px 0 #77A8BB55 inset;
-    }
-    .clicker-btn {
-      margin-top: 18px;
-      width: 120px;
-      height: 120px;
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      box-shadow: none;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 6rem;
-      font-weight: normal;
-      color: #2E9DF7;
       cursor: pointer;
-      user-select: none;
-      transition: transform 0.08s cubic-bezier(0.4,2,0.6,1);
+      animation: popIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .jerry-can {
+      width: 54px;
+      height: 68px;
       position: relative;
-      outline: none;
-      line-height: 1;
-      padding: 0;
+      transition: transform 0.15s;
     }
-    .clicker-btn:active {
-      transform: scale(0.93);
-    }
-    .floating-plus {
+
+    .water-can-wrapper:hover .jerry-can { transform: scale(1.1) rotate(-3deg); }
+
+    /* SVG jerry can drawn with CSS */
+    .can-body {
+      width: 48px;
+      height: 56px;
+      background: var(--yellow);
+      border-radius: 6px 6px 8px 8px;
       position: absolute;
+      bottom: 0;
+      left: 3px;
+      box-shadow: inset -5px 0 0 rgba(0,0,0,0.15), inset 3px 0 0 rgba(255,255,255,0.2);
+    }
+
+    .can-handle {
+      width: 18px;
+      height: 18px;
+      border: 5px solid var(--yellow);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      right: -2px;
+      background: transparent;
+    }
+
+    .can-neck {
+      width: 22px;
+      height: 10px;
+      background: #e6b400;
+      border-radius: 4px 4px 0 0;
+      position: absolute;
+      top: 0;
+      left: 11px;
+    }
+
+    .can-cap {
+      width: 16px;
+      height: 6px;
+      background: #1a1a1a;
+      border-radius: 3px;
+      position: absolute;
+      top: -6px;
+      left: 14px;
+    }
+
+    .can-stripe {
+      width: 100%;
+      height: 4px;
+      background: rgba(0,0,0,0.15);
+      position: absolute;
+      top: 18px;
+    }
+
+    /* clicked flash */
+    .water-can-wrapper.clicked .can-body {
+      background: var(--yellow-light);
+    }
+
+    /* ── OBSTACLE ── */
+    .obstacle-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      animation: popIn 0.2s ease;
+    }
+
+    .mud {
+      width: 64px;
+      height: 64px;
+      background: radial-gradient(circle at 40% 38%, #7a3f0e, #3d1f05);
+      border-radius: 50%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      border: 2px solid #5c3d1e;
+      transition: transform 0.1s;
+    }
+
+    .obstacle-wrapper:hover .mud { transform: scale(1.08); }
+
+    /* penalty screen flash */
+    @keyframes penaltyFlash {
+      0%   { background: rgba(231,76,60,0.25); }
+      100% { background: transparent; }
+    }
+
+    .penalty-flash {
+      animation: penaltyFlash 0.4s ease forwards;
+    }
+
+    /* obstacle shake */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      40%      { transform: translateX(6px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+
+    .shaking { animation: shake 0.35s ease; }
+
+    /* ── RESET BUTTON ── */
+    #reset-btn {
+      display: none;
+      padding: 10px 28px;
+      background: transparent;
+      color: #888;
+      border: 2px solid #444;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+
+    #reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* button row */
+    #btn-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    #btn-row #start-btn { margin-bottom: 0; }
+    #btn-row #reset-btn { margin-bottom: 0; }
+
+    /* ── CONFETTI CANVAS ── */
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       pointer-events: none;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--jerry-can-yellow);
-      text-shadow: 0 2px 8px #00336688;
-      opacity: 0.95;
-      animation: floatUp 0.8s forwards;
-      z-index: 10;
+      z-index: 200;
+      display: none;
     }
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0) scale(1);}
-      80% { opacity: 0.7; }
-      100% { opacity: 0; transform: translateY(-40px) scale(1.3);}
-    }
-    .upgrade-section {
-      width: 100%;
-      margin-bottom: 24px;
-    }
-    .upgrade-title {
-      font-size: 1.1rem;
-      color: var(--deep-blue);
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .upgrade-btn {
-      background: var(--jerry-can-yellow);
-      color: var(--deep-blue);
-      border: none;
-      border-radius: 8px;
-      padding: 12px 22px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px #ffc90733;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .upgrade-btn:disabled {
-      background: #e0e0e0;
-      color: #aaa;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .reset-btn {
-      background: var(--clay-orange);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      font-weight: bold;
-      margin-top: 18px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .reset-btn:hover {
-      background: #a14d2e;
-    }
-    .stats-section {
-      width: 100%;
-      background: #f7f7f7;
-      border-radius: 12px;
-      padding: 18px 16px;
-      margin-bottom: 18px;
-      box-shadow: 0 1px 6px #00336611;
-    }
-    .stats-section h2 {
-      color: var(--deep-blue);
-      font-size: 1.1rem;
-      margin: 0 0 10px 0;
-      font-weight: bold;
-    }
-    .stats-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      font-size: 1.05rem;
-    }
-    .stats-list li {
-      margin-bottom: 6px;
-      color: var(--rich-black);
-    }
-    .fact-toast {
+
+    /* ── SCORE POPUP ── */
+    .score-popup {
       position: absolute;
+      top: 20%;
       left: 50%;
-      top: 100%;
-      transform: translate(-50%, 20px);
-      background: var(--deep-blue);
-      color: #fff;
-      padding: 28px 48px;
-      border-radius: 32px;
-      font-size: 2rem;
-      font-weight: bold;
-      box-shadow: 0 8px 48px #00336699;
-      opacity: 0;
+      transform: translateX(-50%);
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--yellow);
       pointer-events: none;
-      z-index: 1000;
-      animation: toastIn 0.5s forwards;
-      text-align: center;
-      max-width: 90vw;
-      word-break: break-word;
+      z-index: 10;
+      animation: floatUp 0.6s ease forwards;
     }
-    @keyframes toastIn {
-      0% { opacity: 0; transform: translate(-50%, 0) scale(0.9);}
-      100% { opacity: 1; transform: translate(-50%, 20px) scale(1);}
+
+    .score-popup.penalty { color: var(--red); }
+
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.2); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-50px) scale(0.8); }
     }
-    .broken-pipe-overlay {
+
+    /* ── BUTTONS ── */
+    #start-btn {
+      padding: 14px 40px;
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px rgba(255,201,7,0.3);
+      margin-bottom: 20px;
+    }
+
+    #start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255,201,7,0.45);
+    }
+
+    #start-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── GAME OVER OVERLAY ── */
+    #overlay {
+      display: none;
       position: fixed;
       inset: 0;
-      background: var(--clay-orange);
-      opacity: 0.85;
-      z-index: 999;
-      display: flex;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      transition: opacity 0.3s;
-      pointer-events: all;
+      gap: 16px;
+      text-align: center;
+      padding: 24px;
     }
-    .broken-pipe-msg {
+
+    #overlay.show { display: flex; }
+
+    #overlay-emoji { font-size: 4rem; }
+
+    #overlay-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 900;
+      color: var(--yellow);
+    }
+
+    #overlay-msg {
+      font-size: 1rem;
+      color: #ccc;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    #overlay-score {
+      font-size: 1.1rem;
+      font-weight: 700;
       color: #fff;
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 18px;
-      text-shadow: 0 2px 8px #1a1a1a88;
     }
-    .fix-btn {
-      background: #fff;
-      color: var(--clay-orange);
+
+    #play-again-btn {
+      padding: 14px 36px;
+      background: var(--yellow);
+      color: var(--black);
       border: none;
-      border-radius: 8px;
-      padding: 14px 32px;
-      font-size: 1.2rem;
-      font-weight: bold;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 2px 8px #bf6c4633;
-      transition: background 0.2s;
+      margin-top: 8px;
+      transition: transform 0.15s;
     }
-    .fix-btn:active {
-      background: #ffe3d2;
+
+    #play-again-btn:hover { transform: scale(1.04); }
+
+    /* ── FOOTER ── */
+    footer {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      padding: 18px 0 28px;
+      border-top: 1px solid #2a2a2a;
+      margin-top: auto;
     }
-    @media (max-width: 768px) {
-      .main-layout {
-        flex-direction: column;
-        gap: 18px;
-        padding: 10px;
-      }
-      .column.upgrades, .column.stats {
-        align-items: center;
-      }
-      .container-visual, .stage-cup, .stage-bucket, .stage-bathtub, .stage-pool, .stage-waterpark, .stage-ocean {
-        width: 90vw !important;
-        max-width: 98vw;
-        min-width: 0;
-      }
+
+    footer p {
+      font-size: 0.8rem;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    footer a {
+      color: var(--yellow);
+      text-decoration: none;
+      font-weight: 700;
+      margin: 0 8px;
+      font-size: 0.85rem;
+      transition: opacity 0.2s;
+    }
+
+    footer a:hover { opacity: 0.75; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 380px) {
+      #game-grid { gap: 7px; }
+      .jerry-can { width: 44px; height: 56px; }
+      .can-body { width: 38px; height: 45px; }
     }
   </style>
 </head>
 <body>
-  <h1>💧 Clean Water Clicker</h1>
-  <div class="main-layout">
-    <!-- Upgrades Column -->
-    <div class="column upgrades">
-      <div class="upgrade-section">
-        <div class="upgrade-title">Upgrades</div>
-        <button class="upgrade-btn" id="buy-autoclicker">Buy Solar Pump<br>(100L)</button>
-        <div id="autoclicker-status" style="font-size:0.98rem; color:var(--deep-blue); margin-top:8px; min-height:22px;"></div>
-      </div>
-      <button class="reset-btn" id="reset-btn">Reset Mission</button>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-row">
+      <div class="logo-dot"></div>
+      <span class="brand-tag">charity: water</span>
+      <div class="logo-dot"></div>
     </div>
-    <!-- Main Game Column -->
-    <div class="column main">
-      <div class="container-area">
-        <div class="container-label" id="container-label">Cup (Goal: 50L)</div>
-        <div class="container-visual stage-cup" id="container-visual">
-          <div class="water-fill" id="water-fill" style="height:0%"></div>
-        </div>
-        <button class="clicker-btn" id="clicker-btn" title="Collect Water!">💧</button>
-      </div>
-      <div style="text-align:center; color:var(--deep-blue); font-size:1.1rem; margin-top:8px;">
-        Click the droplet to collect water!
-      </div>
-    </div>
-    <!-- Stats & Facts Column -->
-    <div class="column stats">
-      <div class="stats-section">
-        <h2>Stats</h2>
-        <ul class="stats-list">
-          <li>Liters: <span id="liters">0</span> / <span id="goal">50</span></li>
-          <li>Stage: <span id="stage-name">Cup</span></li>
-          <li>Solar Pump: <span id="autoclicker-owned">No</span></li>
-        </ul>
-      </div>
-      <div class="stats-section">
-        <h2>Facts</h2>
-        <div id="fact-box" style="font-size:1rem; color:var(--deep-blue); min-height:40px;">
-          771 million people lack access to clean water.
-        </div>
-      </div>
+    <h1>Water <span>Quest</span></h1>
+    <p class="tagline">Collect jerry cans. Bring water to the world. 💧</p>
+  </header>
+
+  <!-- DIFFICULTY -->
+  <div id="difficulty-section">
+    <p>Choose Difficulty</p>
+    <div class="diff-buttons">
+      <button class="diff-btn selected" data-mode="easy">Easy</button>
+      <button class="diff-btn" data-mode="normal">Normal</button>
+      <button class="diff-btn" data-mode="hard">Hard</button>
     </div>
   </div>
-  <!-- Toast for facts -->
-  <div class="fact-toast" id="fact-toast" style="display:none;"></div>
-  <!-- Broken Pipe Overlay -->
-  <div class="broken-pipe-overlay" id="broken-pipe-overlay" style="display:none;">
-    <div class="broken-pipe-msg">🚨 Broken Pipe! Water is leaking!</div>
-    <button class="fix-btn" id="fix-btn">Fix</button>
+
+  <!-- STATS -->
+  <div id="stats-bar">
+    <div class="stat-box">
+      <span class="stat-label">🪣 Cans</span>
+      <span class="stat-value" id="cans-count">0</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">🎯 Goal</span>
+      <span class="stat-value" id="goal-count">15</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">⏱ Time</span>
+      <span class="stat-value" id="timer-display">30s</span>
+    </div>
   </div>
+
+  <!-- PROGRESS -->
+  <div id="progress-wrap">
+    <div class="progress-label">
+      <span>Progress</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div id="progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- MILESTONE -->
+  <div id="milestone-msg">💧 Keep going!</div>
+
+  <!-- GRID -->
+  <div id="game-grid"></div>
+
+  <!-- BUTTON ROW -->
+  <div id="btn-row">
+    <button id="start-btn">Start Game 🚀</button>
+    <button id="reset-btn">↺ Reset</button>
+  </div>
+
+  <!-- CONFETTI -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- GAME OVER OVERLAY -->
+  <div id="overlay">
+    <div id="overlay-emoji">💧</div>
+    <div id="overlay-title">Time's Up!</div>
+    <div id="overlay-msg">Every can counts. Try again!</div>
+    <div id="overlay-score"></div>
+    <button id="play-again-btn">Play Again</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>This game is inspired by the real mission of charity: water.</p>
+    <a href="https://www.charitywater.org" target="_blank">Visit charity: water →</a>
+    <a href="https://www.charitywater.org/donate" target="_blank">💛 Donate Now</a>
+  </footer>
+
   <script>
-    // --- GAME DATA ---
-    const stages = [
-      { name: "Cup",         goal: 50,      class: "stage-cup" },
-      { name: "Bucket",      goal: 250,     class: "stage-bucket" },
-      { name: "Bathtub",     goal: 1000,    class: "stage-bathtub" },
-      { name: "Swimming Pool", goal: 5000,  class: "stage-pool" },
-      { name: "Waterpark",   goal: 20000,   class: "stage-waterpark" },
-      { name: "Ocean",       goal: 100000,  class: "stage-ocean" }
-    ];
-    const facts = [
-      "771 million people lack access to clean water.",
-      "Every 2 minutes, a child dies from a water-related disease.",
-      "Women and girls spend 200 million hours daily collecting water.",
-      "Access to clean water can improve school attendance by 50%.",
-      "1 in 10 people worldwide live without clean water.",
-      "Charity: water has funded 111,000+ water projects in 29 countries.",
-      "Clean water reduces waterborne diseases by up to 80%.",
-      "Every $1 invested in water returns $4 in economic benefits.",
-      "Dirty water kills more people than all forms of violence, including war.",
-      "Safe water access can cut global poverty by a third."
-    ];
-    // --- GAME STATE ---
-    let liters = 0;
-    let stageIdx = 0;
-    let autoClicker = false;
-    let autoClickerInterval = null;
-    let brokenPipeTimeout = null;
-    let brokenPipeActive = false;
-    let brokenPipeTimer = null;
-    let nextBrokenPipe = null;
-    let factIdx = 0;
-    let pointsPerClick = 1;
-    let pointsPerAuto = 5;
-    // Upgrades unlocked at each milestone
-    const milestoneUpgrades = [
-      { name: "Rain Barrel", desc: "+1 per click", cost: 200, bought: false, effect: function() { pointsPerClick += 1; } },
-      { name: "Water Filter", desc: "+10% per click", cost: 800, bought: false, effect: function() { pointsPerClick = Math.ceil(pointsPerClick * 1.1); } },
-      { name: "Village Well", desc: "+10 per auto", cost: 3000, bought: false, effect: function() { pointsPerAuto += 10; } },
-      { name: "Irrigation", desc: "+50% per auto", cost: 12000, bought: false, effect: function() { pointsPerAuto = Math.ceil(pointsPerAuto * 1.5); } },
-      { name: "Water Tower", desc: "Double all points", cost: 50000, bought: false, effect: function() { pointsPerClick *= 2; pointsPerAuto *= 2; } },
-    ];
-    // --- DOM ELEMENTS ---
-    const litersEl = document.getElementById('liters');
-    const goalEl = document.getElementById('goal');
-    const stageNameEl = document.getElementById('stage-name');
-    const containerLabel = document.getElementById('container-label');
-    const containerVisual = document.getElementById('container-visual');
-    const waterFill = document.getElementById('water-fill');
-    const clickerBtn = document.getElementById('clicker-btn');
-    const buyAutoClickerBtn = document.getElementById('buy-autoclicker');
-    const autoClickerStatus = document.getElementById('autoclicker-status');
-    const autoClickerOwned = document.getElementById('autoclicker-owned');
-    const resetBtn = document.getElementById('reset-btn');
-    const factToast = document.getElementById('fact-toast');
-    const factBox = document.getElementById('fact-box');
-    const brokenPipeOverlay = document.getElementById('broken-pipe-overlay');
-    const fixBtn = document.getElementById('fix-btn');
-    // Upgrades UI
-    const upgradesSection = document.querySelector('.upgrade-section');
-    // --- UTILS ---
-    function updateUI() {
-      litersEl.textContent = liters;
-      goalEl.textContent = stages[stageIdx].goal;
-      stageNameEl.textContent = stages[stageIdx].name;
-      containerLabel.textContent = `${stages[stageIdx].name} (Goal: ${stages[stageIdx].goal.toLocaleString()}L)`;
-      // Container shape
-      containerVisual.className = 'container-visual ' + stages[stageIdx].class;
-      // Water fill
-      let percent = Math.min(100, (liters / stages[stageIdx].goal) * 100);
-      waterFill.style.height = percent + "%";
-      // Upgrades
-      autoClickerOwned.textContent = autoClicker ? "Yes" : "No";
-      buyAutoClickerBtn.disabled = autoClicker || liters < 100;
-      autoClickerStatus.textContent = autoClicker ? `Solar Pump is running (+${pointsPerAuto}L/sec)` : "";
-      // Render milestone upgrades
-      renderMilestoneUpgrades();
+    // ── CONFIG ──
+    const MODES = {
+      easy:   { goal: 15, speed: 1600, time: 40, obstacles: false },
+      normal: { goal: 25, speed: 1000, time: 30, obstacles: true  },
+      hard:   { goal: 40, speed: 550,  time: 25, obstacles: true  }
+    };
+
+    // ════════════════════════════════════════════════
+    // 🔊 SOUND SYSTEM
+    // ── HOW TO ADD YOUR OWN SOUNDS ──────────────────
+    // 1. Download free sounds from pixabay.com or freesound.org
+    // 2. Rename your files to match the names below
+    //    (or change the names below to match your files)
+    // 3. Upload them into your Codespace's project folder
+    // 4. Update the file paths below to point to them
+    //
+    // Suggested searches on Pixabay / Freesound:
+    //   collect  → "water splash", "coin collect", "ding"
+    //   obstacle → "error", "buzz", "wrong answer"
+    //   win      → "fanfare", "success", "victory"
+    //   start    → "whoosh", "game start"
+    //   milestone→ "chime", "level up"
+    // ════════════════════════════════════════════════
+    const SOUNDS = {
+      collect:   new Audio('sounds/collect.mp3'),   // played when you grab a can ✅
+      obstacle:  new Audio('sounds/obstacle.mp3'),  // played when you hit ☠️
+      win:       new Audio('sounds/win.mp3'),       // played on victory screen
+      lose:      new Audio('sounds/lose.mp3'),      // played on time's up
+      start:     new Audio('sounds/start.mp3'),     // played when game begins
+      milestone: new Audio('sounds/milestone.mp3'), // played on milestone messages
+    };
+
+    // Set volumes (0.0 = silent, 1.0 = full)
+    SOUNDS.collect.volume   = 0.7;
+    SOUNDS.obstacle.volume  = 0.8;
+    SOUNDS.win.volume       = 0.9;
+    SOUNDS.lose.volume      = 0.6;
+    SOUNDS.start.volume     = 0.5;
+    SOUNDS.milestone.volume = 0.7;
+
+    // Safe play helper — silently ignores missing files so game still works
+    // even if a sound file hasn't been added yet
+    function playSound(name) {
+      const audio = SOUNDS[name];
+      if (!audio) return;
+      audio.currentTime = 0; // rewind so rapid clicks always replay
+      audio.play().catch(() => {}); // catch = browser blocks or file missing
     }
 
-    function renderMilestoneUpgrades() {
-      // Remove old milestone upgrade buttons
-      let oldBtns = upgradesSection.querySelectorAll('.milestone-upgrade-btn');
-      oldBtns.forEach(btn => btn.remove());
-      // Show upgrades up to current stage
-      for (let i = 0; i <= stageIdx - 1 && i < milestoneUpgrades.length; i++) {
-        const upg = milestoneUpgrades[i];
-        if (upg.bought) continue;
-        const btn = document.createElement('button');
-        btn.className = 'upgrade-btn milestone-upgrade-btn';
-        btn.textContent = `${upg.name} (${upg.desc})\n(${upg.cost}L)`;
-        btn.disabled = liters < upg.cost;
-        btn.onclick = function() {
-          if (liters >= upg.cost && !upg.bought) {
-            liters -= upg.cost;
-            upg.bought = true;
-            upg.effect();
-            updateUI();
-            showFactToast(`Upgrade: ${upg.name} purchased!`);
-          }
-        };
-        upgradesSection.appendChild(btn);
-      }
-    }
-    function showFactToast(msg) {
-      factToast.textContent = msg;
-      // Attach to main-layout for absolute positioning
-      const mainLayout = document.querySelector('.main-layout');
-      if (factToast.parentElement !== mainLayout) {
-        mainLayout.appendChild(factToast);
-      }
-      factToast.style.display = "block";
-      factToast.style.opacity = "1";
-      setTimeout(() => {
-        factToast.style.opacity = "0";
-        setTimeout(() => { factToast.style.display = "none"; }, 1000);
-      }, 6000);
-    }
-    function showFactBox(msg) {
-      factBox.textContent = msg;
-    }
-    function nextFact() {
-      factIdx = (factIdx + 1) % facts.length;
-      return facts[factIdx];
-    }
-    function triggerConfetti() {
-      confetti({
-        particleCount: 300,
-        spread: 120,
-        origin: { y: 0.7 },
-        colors: ['#FFC907', '#2E9DF7', '#77A8BB'],
-        zIndex: 2000
+    // ════════════════════════════════════════════════
+    // 🏆 MILESTONE MESSAGES ARRAY
+    // Each object has:
+    //   at  → how many cans triggers this message
+    //   pct → OR what % of the goal triggers it (optional)
+    //   msg → the message shown in the banner
+    //   type→ "normal" | "warning" | "celebration"
+    // ════════════════════════════════════════════════
+    const MILESTONES = [
+      { at: 1,                        msg: "💧 First can collected! Keep tapping!",         type: "normal"      },
+      { pct: 0.25,                    msg: "⚡ 25% there — you're off to a great start!",    type: "normal"      },
+      { pct: 0.50,                    msg: "🌊 Halfway there! A family now has clean water!", type: "celebration" },
+      { pct: 0.75,                    msg: "🔥 75%! Almost enough for a whole village!",     type: "celebration" },
+      { pct: 0.90,                    msg: "🚀 SO CLOSE! Just a few more cans!",             type: "warning"     },
+      // Fixed-score messages (only show if goal is high enough)
+      { at: 5,                        msg: "🏡 5 people now have access to clean water!",    type: "normal"      },
+      { at: 10,                       msg: "🌍 10 cans! A whole family is saved!",           type: "celebration" },
+      { at: 20,                       msg: "🏘️ 20 cans! An entire village is thriving!",    type: "celebration" },
+      { at: 30,                       msg: "🚰 30 cans! You're a certified water hero!",     type: "celebration" },
+    ];
+
+    // ── STATE ──
+    let currentMode = 'easy';
+    let currentCans = 0;
+    let gameActive  = false;
+    let spawnInterval, timerInterval;
+    let timeLeft = 40;
+    let goalCans = 15;
+    let shownMilestones = new Set();
+
+    // ── DOM REFS ──
+    const grid        = document.getElementById('game-grid');
+    const cansEl      = document.getElementById('cans-count');
+    const goalEl      = document.getElementById('goal-count');
+    const timerEl     = document.getElementById('timer-display');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPct = document.getElementById('progress-pct');
+    const milestoneEl = document.getElementById('milestone-msg');
+    const startBtn    = document.getElementById('start-btn');
+    const resetBtn    = document.getElementById('reset-btn');
+    const overlay     = document.getElementById('overlay');
+    const diffSection = document.getElementById('difficulty-section');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const ctx         = confettiCanvas.getContext('2d');
+
+    // ── DIFFICULTY BUTTONS ──
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (gameActive) return;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        currentMode = btn.dataset.mode;
+        const cfg = MODES[currentMode];
+        goalEl.textContent = cfg.goal;
+        timerEl.textContent = cfg.time + 's';
       });
-      setTimeout(() => {
-        confetti({
-          particleCount: 200,
-          spread: 90,
-          origin: { y: 0.5 },
-          colors: ['#FFC907', '#2E9DF7'],
-          zIndex: 2000
+    });
+
+    // ── BUILD GRID ──
+    function createGrid() {
+      grid.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        grid.appendChild(cell);
+      }
+    }
+    createGrid();
+
+    // ── SPAWN ──
+    function spawnItem() {
+      if (!gameActive) return;
+      const cells = Array.from(document.querySelectorAll('.grid-cell'));
+      const cfg   = MODES[currentMode];
+      cells.forEach(c => c.innerHTML = '');
+
+      const canIdx = Math.floor(Math.random() * cells.length);
+      spawnCan(cells[canIdx]);
+
+      if (cfg.obstacles && Math.random() < 0.4) {
+        let obsIdx;
+        do { obsIdx = Math.floor(Math.random() * cells.length); }
+        while (obsIdx === canIdx);
+        spawnObstacle(cells[obsIdx]);
+      }
+    }
+
+    function spawnCan(cell) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'water-can-wrapper';
+      wrapper.innerHTML = `
+        <div class="jerry-can">
+          <div class="can-cap"></div>
+          <div class="can-neck"></div>
+          <div class="can-body"><div class="can-stripe"></div></div>
+          <div class="can-handle"></div>
+        </div>`;
+      wrapper.addEventListener('click', () => collectCan(cell, wrapper));
+      cell.appendChild(wrapper);
+    }
+
+    function spawnObstacle(cell) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'obstacle-wrapper';
+      wrapper.innerHTML = `<div class="mud">☠️</div>`;
+      wrapper.addEventListener('click', () => hitObstacle(cell, wrapper));
+      cell.appendChild(wrapper);
+    }
+
+    // ── COLLECT CAN ──
+    function collectCan(cell, wrapper) {
+      if (!gameActive) return;
+      wrapper.classList.add('clicked');
+
+      playSound('collect'); // 🔊 splash/ding on collect
+
+      const popup = document.createElement('div');
+      popup.className = 'score-popup';
+      popup.textContent = '+1 💧';
+      cell.appendChild(popup);
+      setTimeout(() => popup.remove(), 650);
+
+      setTimeout(() => { if (cell.contains(wrapper)) cell.innerHTML = ''; }, 280);
+
+      currentCans++;
+      updateScore();
+      checkMilestone();
+      if (currentCans >= goalCans) endGame(true);
+    }
+
+    // ── HIT OBSTACLE ── (Challenge: reduces score by 2, shakes grid, flashes screen)
+    function hitObstacle(cell, wrapper) {
+      if (!gameActive) return;
+
+      playSound('obstacle'); // 🔊 buzz/error on obstacle hit
+
+      // Shake the cell
+      cell.classList.add('shaking');
+      setTimeout(() => cell.classList.remove('shaking'), 400);
+
+      // Flash the body red
+      document.body.classList.add('penalty-flash');
+      setTimeout(() => document.body.classList.remove('penalty-flash'), 400);
+
+      // Penalty is -2 cans (more impactful challenge)
+      const penalty = 2;
+      const popup = document.createElement('div');
+      popup.className = 'score-popup penalty';
+      popup.textContent = `-${penalty} 💣`;
+      cell.appendChild(popup);
+      setTimeout(() => popup.remove(), 700);
+
+      setTimeout(() => { if (cell.contains(wrapper)) cell.innerHTML = ''; }, 320);
+
+      currentCans = Math.max(0, currentCans - penalty);
+      updateScore();
+      showMilestone(`💣 Obstacle! -${penalty} cans!`);
+    }
+
+    // ── UPDATE SCORE ──
+    function updateScore() {
+      cansEl.textContent = currentCans;
+      const pct = Math.min(100, Math.round((currentCans / goalCans) * 100));
+      progressBar.style.width = pct + '%';
+      progressPct.textContent = pct + '%';
+    }
+
+    // ── MILESTONES ──
+    function checkMilestone() {
+      for (const m of MILESTONES) {
+        // Determine the threshold — either a fixed score or a % of the goal
+        const threshold = m.at !== undefined ? m.at : Math.round(m.pct * goalCans);
+        const key = m.at !== undefined ? `at-${m.at}` : `pct-${m.pct}`;
+
+        if (currentCans >= threshold && !shownMilestones.has(key)) {
+          shownMilestones.add(key);
+          showMilestone(m.msg, m.type);
+          playSound('milestone'); // 🔊 chime on every milestone
+        }
+      }
+    }
+
+    function showMilestone(msg, type = 'normal') {
+      milestoneEl.textContent = msg;
+      milestoneEl.className = ''; // clear old type classes
+      milestoneEl.classList.add('show', `milestone-${type}`);
+      clearTimeout(milestoneEl._timeout);
+      milestoneEl._timeout = setTimeout(() => {
+        milestoneEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // ── TIMER ──
+    function startTimer() {
+      const cfg = MODES[currentMode];
+      timeLeft = cfg.time;
+      timerEl.textContent = timeLeft + 's';
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft + 's';
+        if (timeLeft <= 5) timerEl.style.color = '#e74c3c';
+        if (timeLeft <= 0) endGame(false);
+      }, 1000);
+    }
+
+    // ── RESET ── (stops game, restores UI to pre-start state)
+    function resetGame() {
+      gameActive = false;
+      clearInterval(spawnInterval);
+      clearInterval(timerInterval);
+      stopConfetti();
+
+      currentCans = 0;
+      shownMilestones = new Set();
+
+      createGrid();
+      cansEl.textContent = '0';
+      progressBar.style.width = '0%';
+      progressPct.textContent = '0%';
+      timerEl.style.color = '';
+      timerEl.textContent = MODES[currentMode].time + 's';
+      milestoneEl.classList.remove('show');
+      overlay.classList.remove('show');
+
+      startBtn.disabled = false;
+      resetBtn.style.display = 'none';
+      diffSection.style.opacity = '';
+      diffSection.style.pointerEvents = '';
+    }
+
+    // ── START ──
+    function startGame() {
+      currentCans = 0;
+      shownMilestones = new Set();
+      gameActive = true;
+      const cfg = MODES[currentMode];
+      goalCans = cfg.goal;
+
+      goalEl.textContent = goalCans;
+      timerEl.style.color = '';
+      updateScore();
+      createGrid();
+
+      startBtn.disabled = true;
+      resetBtn.style.display = 'block';
+      diffSection.style.opacity = '0.3';
+      diffSection.style.pointerEvents = 'none';
+
+      playSound('start'); // 🔊 whoosh on game start
+
+      spawnItem();
+      spawnInterval = setInterval(spawnItem, cfg.speed);
+      startTimer();
+    }
+
+    // ── END ──
+    function endGame(won) {
+      gameActive = false;
+      clearInterval(spawnInterval);
+      clearInterval(timerInterval);
+      createGrid();
+
+      const emoji   = document.getElementById('overlay-emoji');
+      const title   = document.getElementById('overlay-title');
+      const msg     = document.getElementById('overlay-msg');
+      const scoreEl = document.getElementById('overlay-score');
+
+      if (won) {
+        emoji.textContent = '🏆';
+        title.textContent = 'You Did It!';
+        msg.textContent   = 'You collected enough cans to bring clean water to a community. Amazing!';
+        playSound('win');      // 🔊 fanfare on win
+        launchConfetti();
+      } else {
+        emoji.textContent = currentCans >= Math.floor(goalCans * 0.6) ? '💪' : '💧';
+        title.textContent = currentCans >= Math.floor(goalCans * 0.6) ? 'So Close!' : "Time's Up!";
+        msg.textContent   = currentCans >= Math.floor(goalCans * 0.6)
+          ? 'You were almost there! Give it one more try.'
+          : 'Every drop matters. Keep going — the world needs water heroes!';
+        playSound('lose');     // 🔊 lose sound on time's up
+      }
+
+      scoreEl.textContent = `You collected ${currentCans} of ${goalCans} cans.`;
+      overlay.classList.add('show');
+    }
+
+    // ── PLAY AGAIN ──
+    document.getElementById('play-again-btn').addEventListener('click', resetGame);
+
+    // ── RESET BUTTON ──
+    resetBtn.addEventListener('click', resetGame);
+
+    // ── START BUTTON ──
+    startBtn.addEventListener('click', startGame);
+
+    // ════════════════════════════════
+    // 🎉 CONFETTI ENGINE
+    // ════════════════════════════════
+    let confettiParticles = [];
+    let confettiAnimId = null;
+    const CONFETTI_COLORS = ['#FFC907','#FFE066','#ffffff','#27ae60','#3498db','#e74c3c','#f39c12'];
+
+    function launchConfetti() {
+      confettiCanvas.width  = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+      confettiCanvas.style.display = 'block';
+      confettiParticles = [];
+
+      // create 160 particles
+      for (let i = 0; i < 160; i++) {
+        confettiParticles.push({
+          x:      Math.random() * confettiCanvas.width,
+          y:      Math.random() * confettiCanvas.height - confettiCanvas.height,
+          w:      Math.random() * 12 + 5,
+          h:      Math.random() * 7 + 4,
+          color:  CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+          rot:    Math.random() * Math.PI * 2,
+          rotSpd: (Math.random() - 0.5) * 0.15,
+          speedX: (Math.random() - 0.5) * 3,
+          speedY: Math.random() * 3 + 2,
+          opacity: 1
         });
-      }, 400);
-    }
-    // --- CLICKER LOGIC ---
-    function addLiters(amount, mouseX, mouseY) {
-      liters += amount;
-      if (liters < 0) liters = 0;
-      updateUI();
-      // Animate water fill
-      waterFill.style.transition = "height 0.4s cubic-bezier(0.4,1,0.6,1)";
-      // Floating +1
-      if (amount > 0 && mouseX !== undefined && mouseY !== undefined) {
-        const plus = document.createElement('div');
-        plus.className = 'floating-plus';
-        plus.textContent = `+${amount}`;
-        document.body.appendChild(plus);
-        // Position at mouse
-        plus.style.left = (mouseX - 10) + "px";
-        plus.style.top = (mouseY - 30) + "px";
-        setTimeout(() => plus.remove(), 800);
       }
-      // Check for evolution
-      if (liters >= stages[stageIdx].goal) {
-        if (stageIdx < stages.length - 1) {
-          liters = 0;
-          stageIdx++;
-          // Double points per click and auto at each milestone
-          pointsPerClick *= 2;
-          pointsPerAuto *= 2;
-          updateUI();
-          showFactToast(nextFact());
-          showFactBox(facts[factIdx]);
-        } else {
-          // WIN!
-          liters = stages[stageIdx].goal;
-          updateUI();
-          showFactToast("🌊 You filled the Ocean! Clean water for all!");
-          triggerConfetti();
+      animateConfetti();
+
+      // auto-stop after 4s
+      setTimeout(stopConfetti, 4000);
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+      confettiParticles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+
+        p.x     += p.speedX;
+        p.y     += p.speedY;
+        p.rot   += p.rotSpd;
+        p.speedY += 0.05; // gravity
+
+        // fade out near bottom
+        if (p.y > confettiCanvas.height * 0.75) {
+          p.opacity -= 0.025;
         }
+      });
+
+      // remove faded particles
+      confettiParticles = confettiParticles.filter(p => p.opacity > 0);
+
+      if (confettiParticles.length > 0) {
+        confettiAnimId = requestAnimationFrame(animateConfetti);
+      } else {
+        stopConfetti();
       }
     }
-    clickerBtn.addEventListener('click', e => {
-      // Animate click
-      clickerBtn.style.transform = "scale(0.93)";
-      setTimeout(() => clickerBtn.style.transform = "scale(1)", 90);
-      addLiters(pointsPerClick, e.clientX, e.clientY);
-    });
-    // --- AUTOCLICKER ---
-    buyAutoClickerBtn.addEventListener('click', () => {
-      if (!autoClicker && liters >= 100) {
-        liters -= 100;
-        autoClicker = true;
-        updateUI();
-        autoClickerInterval = setInterval(() => {
-          if (!brokenPipeActive) addLiters(pointsPerAuto);
-        }, 1000);
+
+    function stopConfetti() {
+      if (confettiAnimId) { cancelAnimationFrame(confettiAnimId); confettiAnimId = null; }
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiCanvas.style.display = 'none';
+      confettiParticles = [];
+    }
+
+    window.addEventListener('resize', () => {
+      if (confettiCanvas.style.display !== 'none') {
+        confettiCanvas.width  = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
       }
     });
-    // --- BROKEN PIPE EVENT ---
-    function scheduleBrokenPipe() {
-      if (nextBrokenPipe) clearTimeout(nextBrokenPipe);
-      nextBrokenPipe = setTimeout(triggerBrokenPipe, 45000);
-    }
-    function triggerBrokenPipe() {
-      if (brokenPipeActive) return;
-      brokenPipeActive = true;
-      brokenPipeOverlay.style.display = "flex";
-      // Timer to auto-lose liters if not fixed
-      brokenPipeTimer = setTimeout(() => {
-        if (brokenPipeActive) {
-          addLiters(-100);
-          brokenPipeOverlay.style.display = "none";
-          brokenPipeActive = false;
-          scheduleBrokenPipe();
-        }
-      }, 5000);
-    }
-    fixBtn.addEventListener('click', () => {
-      if (brokenPipeActive) {
-        brokenPipeActive = false;
-        brokenPipeOverlay.style.display = "none";
-        if (brokenPipeTimer) clearTimeout(brokenPipeTimer);
-        scheduleBrokenPipe();
-      }
-    });
-    // --- RESET ---
-    resetBtn.addEventListener('click', () => {
-      if (confirm("Are you sure you want to reset your mission? All progress will be lost.")) {
-        liters = 0;
-        stageIdx = 0;
-        autoClicker = false;
-        pointsPerClick = 1;
-        pointsPerAuto = 5;
-        milestoneUpgrades.forEach(u => u.bought = false);
-        if (autoClickerInterval) clearInterval(autoClickerInterval);
-        updateUI();
-        showFactBox(facts[0]);
-        scheduleBrokenPipe();
-      }
-    });
-    // --- INIT ---
-    function init() {
-      updateUI();
-      showFactBox(facts[0]);
-      scheduleBrokenPipe();
-    }
-    window.onload = init;
   </script>
 </body>
 </html>
