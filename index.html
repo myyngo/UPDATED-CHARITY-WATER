@@ -91,7 +91,6 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-    <!-- JavaScript moved to script.js -->
       color: #888;
     }
 
@@ -819,7 +818,7 @@
       const penalty = 2;
       const popup = document.createElement('div');
       popup.className = 'score-popup penalty';
-      popup.textContent = `-${penalty} 💣`;
+      popup.textContent = `-${penalty} ☠️`;
       cell.appendChild(popup);
       setTimeout(() => popup.remove(), 700);
 
@@ -827,7 +826,7 @@
 
       currentCans = Math.max(0, currentCans - penalty);
       updateScore();
-      showMilestone(`💣 Obstacle! -${penalty} cans!`);
+      showMilestone(`☠️ Obstacle! -${penalty} cans!`);
     }
 
     // ── UPDATE SCORE ──
